@@ -21,7 +21,7 @@ jobs:
       - name: Setup Python (latest 3.x)
         uses: actions/setup-python@v4
         with:
-          python-version: "3.14.2"
+          python-version: "3.x"
 
       - name: Setup Node (latest LTS)
         uses: actions/setup-node@v4
@@ -60,14 +60,19 @@ jobs:
             artifacts
             results
 
-      - name: Commit report back to repository
+      - name: Commit report and push to branch
         env:
           GIT_TERMINAL_PROMPT: 0
         run: |
+          set -e
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 添加可能的报告文件
           git add results/report.md results/summary.json || true
 
+          # 如果没有变更则退出成功（不推送）
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
@@ -75,12 +80,12 @@ jobs:
 
           git commit -m "Add benchmark report [skip ci]" || true
 
-          # 确保我们有最新的远程 main，然后尝试 rebase。若 rebase 失败则 abort 并失败 workflow。
-          git fetch origin main
-          if git rebase origin/main; then
-            git push origin HEAD:main
-          else
-            echo "Rebase failed — aborting and exiting with error. Please merge remote changes into main manually."
-            git rebase --abort || true
-            exit 1
-          fi
+          # 创建带时间戳的分支名，避免与 main 的直接竞态
+          BRANCH="bench-report-$(date -u +'%Y%m%dT%H%M%SZ')-$(git rev-parse --short HEAD)"
+          echo "Pushing report to branch: $BRANCH"
+
+          # 新建分支并推送到远端
+          git checkout -b "$BRANCH"
+          git push --set-upstream origin "$BRANCH"
+
+          echo "Report pushed to branch: $BRANCH"
