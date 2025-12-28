@@ -1,0 +1,45 @@
+{
+  "generated_at": "2025-12-28T06:34:37.289086Z",
+  "results": [
+    {
+      "file": "c.json",
+      "lang": "c",
+      "ok": true,
+      "raw": "{\"lang\":\"c\",\"time\":0.031236,\"sum\":100000000}",
+      "time": 0.031236,
+      "sum": 100000000
+    },
+    {
+      "file": "cpp.json",
+      "lang": "cpp",
+      "ok": true,
+      "raw": "{\"lang\":\"cpp\",\"time\":0.0313146,\"sum\":100000000}",
+      "time": 0.0313146,
+      "sum": 100000000
+    },
+    {
+      "file": "js.json",
+      "lang": "js",
+      "ok": true,
+      "raw": "{\"lang\":\"js\",\"time\":0.056332775,\"sum\":100000000}",
+      "time": 0.056332775,
+      "sum": 100000000
+    },
+    {
+      "file": "python.json",
+      "lang": "python",
+      "ok": false,
+      "raw": "{'lang': 'python', 'time': 8.036003636000032, 'sum': 100000000}",
+      "time": null,
+      "sum": null
+    },
+    {
+      "file": "rust.json",
+      "lang": "rust",
+      "ok": true,
+      "raw": "{\"lang\":\"rust\",\"time\":0.000000,\"sum\":100000000}",
+      "time": 0.0,
+      "sum": 100000000
+    }
+  ]
+}
