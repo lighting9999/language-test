@@ -1,0 +1,72 @@
+name: language-bench
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout repository (for read/write)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Python (latest)
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Setup Node (latest)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Setup Java (latest temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 'latest'
+
+      - name: Install Rust (stable)
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install clang
+        run: sudo apt-get update && sudo apt-get install -y clang
+
+      - name: Run benchmarks
+        run: |
+          chmod +x ./run_bench.sh
+          ./run_bench.sh artifacts
+
+      - name: Aggregate results into report
+        run: |
+          python3 tools/aggregate_results.py artifacts results
+
+      - name: Upload artifacts (bench results + report)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: |
+            artifacts
+            results
+
+      - name: Commit report back to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results/report.md results/summary.json || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add benchmark report [skip ci]" || true
+            git push origin HEAD:main
+          fi
